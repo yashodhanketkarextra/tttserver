@@ -129,4 +129,62 @@ export class BoardService {
 
     return newBoard;
   }
+
+  async joinBoard(
+    id: string,
+    userId: string,
+    key: string,
+  ): Promise<{ status: BoardStatus | null; joined: Boolean }> {
+    const dbBoard = await BoardModel.findById(id);
+    const player = new Types.ObjectId(userId);
+    if (!dbBoard) throw new AppError("Incorrect board number", 404);
+    if (key !== dbBoard.key) throw new AppError("Incorrect board key", 400);
+
+    if (!dbBoard.startedBy.equals(player) && !dbBoard.against) {
+      console.log("Debug");
+      await BoardModel.updateOne(dbBoard, {
+        against: player,
+        numberOfPlayers: Number(dbBoard.numberOfPlayers) + 1,
+      });
+    }
+
+    const status = this.boardStatus(new Board(dbBoard.grid));
+    return { status, joined: true };
+  }
+
+  async myBoards(userId: string) {
+    const id = new Types.ObjectId(userId);
+    const boards = (
+      await BoardModel.find({
+        $or: [{ against: id }, { startedBy: id }],
+      })
+    )
+      .filter((ele) => ele.isDraw === false && ele.hasWinner === false)
+      .map((ele) => ele._id);
+    return boards;
+  }
+
+  async getById(id: string) {
+    const dbBoard = await BoardModel.findOne({ _id: id });
+    if (!dbBoard) throw new AppError("Board not found", 404);
+    return dbBoard;
+  }
+
+  async listAll() {
+    const boards = await BoardModel.find()
+      .populate("against", "username")
+      .populate("startedBy", "username")
+      .populate("winner", "username");
+
+    return boards;
+  }
+
+  async selfBoard(userId: string) {
+    const id = new Types.ObjectId(userId);
+    const boards = await BoardModel.find({
+      $or: [{ against: id }, { startedBy: id }],
+    });
+
+    return boards;
+  }
 }
