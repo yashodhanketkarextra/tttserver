@@ -5,6 +5,7 @@ import { HOST, MainRouter, PORT, configApp, mongoConnection } from "./config";
 export const app = express();
 export const { app: appWS } = expressWs(app);
 export const wsInstance = expressWs(appWS);
+import { errMiddlware } from "./middlewares/globalErrors";
 
 // apply configs
 app.use(configApp);
@@ -22,6 +23,8 @@ appWS.ws("/", (ws: any) => {
 });
 
 app.use("/api", MainRouter);
+app.use(errMiddlware);
+
 app.listen(PORT, HOST, () => {
   console.log("Server is running");
 });

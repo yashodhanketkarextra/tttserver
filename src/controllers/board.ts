@@ -3,8 +3,9 @@ import { type AuthRequest } from "../middlewares/auth";
 import Board from "tictactoe-board";
 import { WebScoketHelper } from "../helpers/ws";
 import { BoardModel } from "../model/board";
-import { UserModel } from "../model/user";
 import { Types } from "mongoose";
+import { BoardService } from "../services/board";
+import { catchAsync } from "../middlewares/globalErrors";
 
 const boardStatus = (board: Board) => {
   return {
@@ -16,28 +17,16 @@ const boardStatus = (board: Board) => {
   };
 };
 
-const addWin = async (player?: unknown) =>
-  await UserModel.findByIdAndUpdate(player, { $inc: { win: 1, played: 1 } });
-
-const addLoss = async (player: unknown) =>
-  await UserModel.findByIdAndUpdate(player, { $inc: { loss: 1, played: 1 } });
-
-const addDraw = async (player: unknown) =>
-  await UserModel.findByIdAndUpdate(player, { $inc: { draw: 1, played: 1 } });
-
 export class BoardController {
+  private readonly svc = new BoardService();
+
   start = async (req: AuthRequest, res: Response) => {
-    const key = Math.random().toString(36).substring(2, 7);
-
-    const board = new Board();
-    const initialStatus = boardStatus(board);
-
-    const newBoard = await BoardModel.create({
-      ...initialStatus,
-      startedBy: new Types.ObjectId(req.userId),
-      key,
-    });
-    return res.status(201).json(newBoard);
+    try {
+      const board = await this.svc.createBoard(req.userId!);
+      return res.status(201).json(board);
+    } catch (err) {
+      return res.status(500).json({ message: (err as Error).message });
+    }
   };
 
   join = async (req: AuthRequest, res: Response) => {
@@ -91,84 +80,27 @@ export class BoardController {
     }
   };
 
-  move = async (req: AuthRequest, res: Response) => {
-    let board: Board;
-    const id = new Types.ObjectId(req.userId);
-    const dbBoard = await BoardModel.findById(id);
-    if (!dbBoard)
-      return res.status(404).json({ message: "Board not found" }).end();
-    board = new Board(dbBoard.grid);
-    const { index } = req.body;
+  move = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { board, complete } = await this.svc.move(
+      req.params.id as string,
+      req.userId!,
+      req.body.index,
+    );
 
-    if (board.isPositionTaken(index)) {
-      return res.status(400).json({
-        message: "Illegal move - Not allowed",
-        status: boardStatus(board),
-      });
+    if (complete) {
+      await WebScoketHelper.sender(JSON.stringify({ status: board }));
+      return;
     }
 
-    const mark = board.currentMark();
-
-    if (
-      (mark === "X" && dbBoard.startedBy !== id) ||
-      (mark === "O" && dbBoard.against !== id)
-    )
-      return res
-        .status(400)
-        .json({
-          message: "Illegal move - Out of turn",
-          status: boardStatus(board),
-        })
-        .end();
-
-    board = board.makeMove(index, mark);
-    await BoardModel.findByIdAndUpdate(dbBoard._id, {
-      $set: { ...boardStatus(board) },
-    });
-
-    if (board.hasWinner()) {
-      if (board.winningPlayer() === "X") {
-        await addWin(dbBoard.startedBy);
-        await addLoss(dbBoard.against);
-        await BoardModel.findByIdAndUpdate(dbBoard._id, {
-          $set: { winner: dbBoard.startedBy },
-        });
-      } else {
-        await addLoss(dbBoard.startedBy);
-        await addWin(dbBoard.against);
-        await BoardModel.findByIdAndUpdate(dbBoard._id, {
-          $set: { winner: dbBoard.against },
-        });
-      }
-      await WebScoketHelper.sender(
-        JSON.stringify({
-          status: boardStatus(board),
-        }),
-      );
-      return res
-        .status(200)
-        .json({ message: `Player ${board.winningPlayer()}` });
-    }
-
-    if (board.isGameDraw()) {
-      await addDraw(dbBoard.startedBy);
-      await addDraw(dbBoard.against);
-      await WebScoketHelper.sender(
-        JSON.stringify({
-          status: boardStatus(board),
-        }),
-      );
-    }
-
-    const status = boardStatus(board);
     await WebScoketHelper.sender(
       JSON.stringify({
-        _id: dbBoard._id,
-        grid: status.grid,
+        _id: req.params.id,
+        grid: board.grid,
       }),
     );
-    return res.status(200).json(status);
-  };
+
+    return res.status(200).json(board);
+  });
 
   getAll = async (_req: AuthRequest, res: Response) => {
     const boards = await BoardModel.find()
