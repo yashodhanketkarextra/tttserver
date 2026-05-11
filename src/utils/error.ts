@@ -12,7 +12,7 @@ export class AppError extends Error {
   }
 
   handler = (res: Response) => {
-    console.log(this.message);
+    console.error(this.message);
     return res.status(this.statusCode).json({ message: this.message });
   };
 }

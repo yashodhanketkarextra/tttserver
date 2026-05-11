@@ -1,101 +1,35 @@
 import { Request, Response } from "express";
-import { getToken, hashPass, verifyPass } from "../auth";
-import { BoardModel } from "../model/board";
-import { UserModel } from "../model/user";
 import { type AuthRequest } from "../middlewares/auth";
+import { UserService } from "../services/user";
+import { catchAsync } from "../middlewares/globalErrors";
 
 export class UserController {
-  register = async (req: Request, res: Response) => {
-    try {
-      const user = await UserModel.create({
-        ...req.body,
-        password: await hashPass(req.body.password),
-      });
-      return res
-        .status(201)
-        .json({ user: user.username, message: "User created" });
-    } catch (err) {
-      return res.status(500).json({ message: "Error creating new user" }).end();
-    }
-  };
+  private readonly svc = new UserService();
 
-  login = async (req: Request, res: Response) => {
-    try {
-      const user = await UserModel.findOne({ username: req.body.username });
-      if (!user)
-        return res.status(401).json({ message: "Invalid credentials" }).end();
-      if (!(await verifyPass(req.body.password, user.password)))
-        return res.status(401).json({ message: "Invalid credentials" }).end();
-      const token = await getToken({
-        _id: String(user._id),
-        username: user.username,
-      });
-      return res.json({ message: `Welcome ${user.username}`, token });
-    } catch (err) {
-      return res.status(500).end();
-    }
-  };
+  register = catchAsync(async (req: Request, res: Response) => {
+    const user = await this.svc.register(req.body);
+    return res
+      .status(201)
+      .json({ user: user.username, message: "User created" });
+  });
 
-  me = async (req: AuthRequest, res: Response) => {
-    const user = await UserModel.findById(req.userId);
-    if (!user) return res.status(401).end();
-    return res.json({ id: user._id, username: user.username });
-  };
+  login = catchAsync(async (req: Request, res: Response) => {
+    const { user, token } = await this.svc.login(req.body);
+    return res.json({ message: `Welcome ${user.username}`, token });
+  });
 
-  statsByID = async (req: AuthRequest, res: Response) => {
-    const id = req.userId;
-    const user = await UserModel.findById(id);
-    if (!user) return res.status(404).end();
-    const winRate = user.win / user.played;
-    const lossRate = user.loss / user.played;
-    const drawRate = user.draw / user.played;
-    const boards = (
-      await BoardModel.find({
-        $or: [{ startedBy: id }, { against: id }],
-      }).populate("winner", "username")
-    ).map((board) => {
-      return {
-        _id: board._id,
-        isGameOver: board.isGameOver,
-        hasWinner: board.hasWinner,
-        winner: board.winner,
-      };
-    });
-    return res.status(200).json({
-      username: user.username,
-      games: user.played,
-      win: user.win,
-      winRate,
-      loss: user.loss,
-      lossRate,
-      draw: user.draw,
-      drawRate,
-      boards,
-    });
-  };
+  me = catchAsync(async (req: AuthRequest, res: Response) => {
+    const user = await this.svc.getById(req.userId!);
+    return res.status(200).json({ id: user._id, username: user.username });
+  });
 
-  stats = async (_req: AuthRequest, res: Response) => {
-    try {
-      const users = (await UserModel.find()).map((user) => {
-        const winRate = parseFloat((user.win / user.played).toFixed(2));
-        const lossRate = parseFloat((user.loss / user.played).toFixed(2));
-        const drawRate = parseFloat((user.draw / user.played).toFixed(2));
-        return {
-          _id: user._id,
-          username: user.username,
-          games: user.played,
-          win: user.win,
-          winRate,
-          loss: user.loss,
-          lossRate,
-          draw: user.draw,
-          drawRate,
-        };
-      });
-      return res.status(200).json(users);
-    } catch (err) {
-      console.log(err);
-      return res.status(500).end();
-    }
-  };
+  statsByID = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { stats } = await this.svc.gameStats(req.userId!);
+    return res.status(200).json({ ...stats });
+  });
+
+  stats = catchAsync(async (_req: AuthRequest, res: Response) => {
+    const users = await this.svc.listStats();
+    return res.status(200).json(users);
+  });
 }
