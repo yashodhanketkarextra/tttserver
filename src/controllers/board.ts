@@ -1,18 +1,17 @@
-import { type Response } from "express";
-import { type AuthRequest } from "../middlewares/auth";
-import { WebScoketHelper } from "../helpers/ws";
+import type { Response, Request } from "express";
+import { WebScoketHelper } from "../lib/ws";
 import { BoardService } from "../services/board";
 import { catchAsync } from "../middlewares/globalErrors";
 
 export class BoardController {
   private readonly svc = new BoardService();
 
-  start = catchAsync(async (req: AuthRequest, res: Response) => {
+  start = catchAsync(async (req: Request, res: Response) => {
     const board = await this.svc.createBoard(req.userId!);
-    return res.status(201).json(board);
+    return res.respond("Board created", 201, board);
   });
 
-  join = catchAsync(async (req: AuthRequest, res: Response) => {
+  join = catchAsync(async (req: Request, res: Response) => {
     const { status, joined } = await this.svc.joinBoard(
       req.params.id as string,
       req.userId!,
@@ -25,24 +24,25 @@ export class BoardController {
       );
     }
 
-    return res.status(200).json({ status });
+    return res.respond("Joined board", 200, { status });
   });
 
-  myBoards = catchAsync(async (req: AuthRequest, res: Response) => {
+  myBoards = catchAsync(async (req: Request, res: Response) => {
     const boards = await this.svc.myBoards(req.userId!);
-    return res.json(boards);
+    return res.respond("Users boards", 200, boards);
   });
 
-  getByID = catchAsync(async (req: AuthRequest, res: Response) => {
+  getByID = catchAsync(async (req: Request, res: Response) => {
     const dbBoard = await this.svc.getById(req.params.id as string);
-    return res.status(200).json(dbBoard);
+    return res.respond("Board information", 200, { board: dbBoard });
   });
 
-  move = catchAsync(async (req: AuthRequest, res: Response) => {
+  move = catchAsync(async (req: Request, res: Response) => {
+    const moveIndex = req.body.index;
     const { board, complete } = await this.svc.move(
       req.params.id as string,
       req.userId!,
-      req.body.index,
+      moveIndex,
     );
 
     if (complete) {
@@ -57,16 +57,16 @@ export class BoardController {
       }),
     );
 
-    return res.status(200).json(board);
+    return res.respond(`Move made on ${moveIndex}`, 200, { board });
   });
 
-  getAll = catchAsync(async (_req: AuthRequest, res: Response) => {
+  getAll = catchAsync(async (_req: Request, res: Response) => {
     const boards = await this.svc.listAll();
-    return res.status(200).json([...boards]);
+    return res.respond("All boards", 200, boards);
   });
 
-  my = catchAsync(async (req: AuthRequest, res: Response) => {
+  my = catchAsync(async (req: Request, res: Response) => {
     const boards = await this.svc.selfBoard(req.userId!);
-    return res.status(200).json({ boards });
+    return res.respond("Users boards", 200, boards);
   });
 }

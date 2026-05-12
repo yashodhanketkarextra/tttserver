@@ -1,4 +1,4 @@
-import { wsInstance } from "../server";
+import { wsInstance } from "../app";
 
 class WebScoketHelperClass {
   sender = async (message: string) => {

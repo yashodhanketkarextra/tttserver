@@ -2,3 +2,9 @@ node_modules
 .env
 .vscode
 dist/
+
+.env.local
+.env.prod
+.env.test
+
+tests/k6

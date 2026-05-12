@@ -1,18 +1,17 @@
-import { getToken, hashPass, verifyPass } from "../auth";
+import { AuthHelper } from "../lib/auth";
 import { UserModel } from "../model/user";
-import { AppError } from "../utils/error";
+import { AppError } from "../lib/error";
 import { Types } from "mongoose";
 
 export class UserService {
+  private readonly auth = new AuthHelper();
+
   listUsers = async () => {
     return await UserModel.find();
   };
 
   async register(data: any) {
-    const user = await UserModel.create({
-      ...data,
-      password: await hashPass(data.password),
-    });
+    const user = await UserModel.create({ ...data });
 
     return user;
   }
@@ -21,10 +20,10 @@ export class UserService {
     const user = await UserModel.findOne({ username: data.username });
     if (!user) throw new AppError("Invalid credentials", 401);
 
-    const validate = await verifyPass(data.password, user.password);
+    const validate = await this.auth.verifyPass(data.password, user.password);
     if (!validate) throw new AppError("Invalid credentials", 401);
 
-    const token = await getToken({
+    const token = await this.auth.getToken({
       _id: String(user._id),
       username: user.username,
     });
@@ -39,8 +38,9 @@ export class UserService {
   }
 
   async gameStats(userId: string) {
+    const id = new Types.ObjectId(userId);
     const stats = await UserModel.aggregate([
-      { $match: { _id: new Types.ObjectId(userId) } },
+      { $match: { _id: id } },
       {
         $lookup: {
           from: "boards",
@@ -56,8 +56,6 @@ export class UserService {
                 },
               },
             },
-            { $limit: 20 },
-            { $sort: { createdAt: -1 } },
           ],
           as: "boards",
         },
@@ -87,9 +85,23 @@ export class UserService {
           },
         },
       },
+      {
+        $project: {
+          _id: 0,
+          username: 1,
+          boards: 1,
+          games: "$played",
+          win: 1,
+          winRate: 1,
+          loss: 1,
+          lossRate: 1,
+          draw: 1,
+          drawRate: 1,
+        },
+      },
     ]);
 
-    return stats[0] || null;
+    return stats[0] || {};
   }
 
   async listStats() {
@@ -123,6 +135,7 @@ export class UserService {
         $project: {
           _id: 1,
           username: 1,
+          boards: 1,
           games: "$played",
           win: 1,
           winRate: 1,

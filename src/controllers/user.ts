@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { type AuthRequest } from "../middlewares/auth";
 import { UserService } from "../services/user";
 import { catchAsync } from "../middlewares/globalErrors";
 
@@ -8,28 +7,35 @@ export class UserController {
 
   register = catchAsync(async (req: Request, res: Response) => {
     const user = await this.svc.register(req.body);
-    return res
-      .status(201)
-      .json({ user: user.username, message: "User created" });
+    return res.respond("User Created", 201, {
+      id: user._id,
+      username: user.username,
+    });
   });
 
   login = catchAsync(async (req: Request, res: Response) => {
     const { user, token } = await this.svc.login(req.body);
-    return res.json({ message: `Welcome ${user.username}`, token });
+    return res.respond("User logged in", 200, {
+      user: `Welcome ${user.username}`,
+      token,
+    });
   });
 
-  me = catchAsync(async (req: AuthRequest, res: Response) => {
+  me = catchAsync(async (req: Request, res: Response) => {
     const user = await this.svc.getById(req.userId!);
-    return res.status(200).json({ id: user._id, username: user.username });
+    return res.respond("User information", 200, {
+      id: user._id,
+      username: user.username,
+    });
   });
 
-  statsByID = catchAsync(async (req: AuthRequest, res: Response) => {
-    const { stats } = await this.svc.gameStats(req.userId!);
-    return res.status(200).json({ ...stats });
+  statsByID = catchAsync(async (req: Request, res: Response) => {
+    const stats = await this.svc.gameStats(req.userId!);
+    return res.respond("User's personal stats", 200, { ...stats });
   });
 
-  stats = catchAsync(async (_req: AuthRequest, res: Response) => {
+  stats = catchAsync(async (_req: Request, res: Response) => {
     const users = await this.svc.listStats();
-    return res.status(200).json(users);
+    return res.respond("All users stats", 200, users);
   });
 }

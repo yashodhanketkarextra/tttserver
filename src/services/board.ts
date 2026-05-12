@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import Board from "tictactoe-board";
 import { BoardModel } from "../model/board";
 import { UserModel } from "../model/user";
-import { AppError } from "../utils/error";
+import { AppError } from "../lib/error";
 
 interface BoardStatus {
   grid: string[];
