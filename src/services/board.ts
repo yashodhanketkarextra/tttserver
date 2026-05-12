@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import Board from "tictactoe-board";
+import Board from "../lib/board";
 import { BoardModel } from "../model/board";
 import { UserModel } from "../model/user";
 import { AppError } from "../lib/error";
