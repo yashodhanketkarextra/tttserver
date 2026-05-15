@@ -41,7 +41,7 @@ export class BoardService {
     startedBy: Types.ObjectId,
     against: Types.ObjectId,
   ): Promise<{ board: BoardStatus; complete: Boolean }> {
-    if (board.winningPlayer() === "X") {
+    if (board.winningPlayer() === "O") {
       await this.addWin(startedBy);
       await this.addLoss(against);
       await BoardModel.findByIdAndUpdate(id, {

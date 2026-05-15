@@ -15,7 +15,7 @@ export class AuthHelper {
   async getToken(user: User) {
     if (!user._id) throw new Error("User not found");
     return sign({ _id: user._id, username: user.username }, TOKEN, {
-      expiresIn: "7d",
+      expiresIn: "1d",
     });
   }
 }

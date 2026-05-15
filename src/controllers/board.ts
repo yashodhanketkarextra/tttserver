@@ -8,6 +8,11 @@ export class BoardController {
 
   start = catchAsync(async (req: Request, res: Response) => {
     const board = await this.svc.createBoard(req.userId!);
+
+    await WebScoketHelper.sender(
+      JSON.stringify({ message: "New board created" }),
+    );
+
     return res.respond("Board created", 201, board);
   });
 
@@ -46,7 +51,9 @@ export class BoardController {
     );
 
     if (complete) {
-      await WebScoketHelper.sender(JSON.stringify({ status: board }));
+      await WebScoketHelper.sender(
+        JSON.stringify({ status: board, message: "Game over" }),
+      );
       return;
     }
 
@@ -54,6 +61,7 @@ export class BoardController {
       JSON.stringify({
         _id: req.params.id,
         grid: board.grid,
+        message: "Move made on " + moveIndex,
       }),
     );
 
