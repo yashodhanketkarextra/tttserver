@@ -3,6 +3,8 @@ allowBuilds:
   core-js: true
   mongodb-memory-server: true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - qs@6.15.2
 overrides:
   braces@<3.0.3: '>=3.0.3'
   json5@<1.0.2: '>=1.0.2'
