@@ -12,7 +12,10 @@ export class AppError extends Error {
   }
 
   handler = (res: Response) => {
-    console.error(this.message);
+    if (process.env.NODE_ENV !== "test") {
+      console.error(this.message);
+    }
+
     return res.status(this.statusCode).json({ message: this.message });
   };
 }

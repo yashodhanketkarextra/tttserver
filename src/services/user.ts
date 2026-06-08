@@ -11,6 +11,8 @@ export class UserService {
   };
 
   async register(data: any) {
+    const exists = await UserModel.countDocuments({ username: data.username });
+    if (exists !== 0) throw new AppError("User already exists", 400);
     const user = await UserModel.create({ ...data });
 
     return user;
