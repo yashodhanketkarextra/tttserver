@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "type": "commonjs",
-  "license": "MIT",
+  "license": "GNU GPLv3",
   "scripts": {
     "dev": "ts-node-dev --watch src --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "jest --verbose"
+    "test": "jest --verbose --detectOpenHandles"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

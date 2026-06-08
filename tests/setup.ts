@@ -1,21 +1,16 @@
 import mongoose from "mongoose";
-import { MongoMemoryServer } from "mongodb-memory-server";
+import { config } from "dotenv";
 
-let mongoServer: MongoMemoryServer;
+config({ path: ".env.test" });
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const uri = mongoServer.getUri();
-  await mongoose.connect(uri);
+  await mongoose.connect(process.env.DB_URI!);
   jest.spyOn(console, "error").mockImplementation(() => {});
 });
 
 afterAll(async () => {
-  if (mongoServer) {
-    await mongoose.disconnect();
-    await mongoServer.stop();
-    jest.resetAllMocks();
-  }
+  await mongoose.disconnect();
+  jest.resetAllMocks();
 });
 
 afterEach(async () => {
