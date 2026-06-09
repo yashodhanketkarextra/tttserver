@@ -3,7 +3,7 @@ import { config } from "dotenv";
 const evnFile = process.env.NODE_ENV === "test" ? ".env.test" : ".env";
 config({ path: evnFile });
 
-const envLoader = <T>(varKey: string, transformer: (val: string) => T): T => {
+export const envLoader = <T>(varKey: string, transformer: (val: string) => T): T => {
   const varVal = process.env[varKey];
   if (!varVal) throw new Error(`Missing env variable: ${varKey}`);
   return transformer(varVal);

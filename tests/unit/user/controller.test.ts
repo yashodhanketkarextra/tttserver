@@ -1,15 +1,19 @@
 import request from "supertest";
 import { httpServer } from "../../../src/app";
 import { UserModel } from "../../../src/model/user";
+import mongoose from "mongoose";
 
 describe("user controller tests", () => {
   let loginToken: string;
+  let userId: string;
 
   beforeEach(async () => {
-    await UserModel.create({
+    const user = await UserModel.create({
       username: "user1",
       password: "password",
     });
+
+    userId = (user._id as mongoose.Types.ObjectId).toString();
 
     const res = await request(httpServer).post("/api/user/login").send({
       username: "user1",
@@ -84,7 +88,7 @@ describe("user controller tests", () => {
 
   it("should return users personal stats", async () => {
     const res = await request(httpServer)
-      .get("/api/user/stats/1")
+      .get(`/api/user/stats/${userId}`)
       .set({ Authorization: "Bearer " + loginToken });
 
     expect(res.status).toBe(200);
@@ -92,12 +96,20 @@ describe("user controller tests", () => {
     expect(res.body.data.totalBoards).toBeUndefined();
   });
 
-  it("should return user not found", async () => {
+  it("should return 500", async () => {
     const res = await request(httpServer)
       .get("/api/user/stats/99")
       .set({ Authorization: "Bearer " + loginToken });
 
-    console.log(res.body);
+    expect(res.status).toBe(500);
+  });
+
+  it("should return user not found", async () => {
+    const fakeId = new mongoose.Types.ObjectId().toString();
+    const res = await request(httpServer)
+      .get("/api/user/stats/" + fakeId)
+      .set({ Authorization: "Bearer " + loginToken });
+
     expect(res.status).toBe(404);
     expect(res.body.message).toBe("User not found");
   });

@@ -1,7 +1,6 @@
 import { AuthHelper } from "../lib/auth";
 import { UserModel } from "../model/user";
 import { AppError } from "../lib/error";
-import { Types } from "mongoose";
 
 export class UserService {
   private readonly auth = new AuthHelper();
@@ -40,7 +39,8 @@ export class UserService {
   }
 
   async gameStats(userId: string) {
-    const id = new Types.ObjectId(userId);
+    const id = (await this.getById(userId))._id;
+
     const stats = await UserModel.aggregate([
       { $match: { _id: id } },
       {
