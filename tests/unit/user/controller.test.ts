@@ -27,9 +27,7 @@ describe("user controller tests", () => {
   });
 
   it("should register user", async () => {
-    const res = await request(httpServer)
-      .post("/api/user/register")
-      .send({ username: "user2", password: "password" });
+    const res = await request(httpServer).post("/api/user/register").send({ username: "user2", password: "password" });
 
     expect(res.status).toBe(201);
     expect(res.body.message).toBe("User Created");
@@ -57,9 +55,7 @@ describe("user controller tests", () => {
   });
 
   it("should return 401: invalid credentials - wrong user", async () => {
-    const res = await request(httpServer)
-      .post("/api/user/login")
-      .send({ username: "user2", password: "password" });
+    const res = await request(httpServer).post("/api/user/login").send({ username: "user2", password: "password" });
 
     expect(res.status).toBe(401);
     expect(res.body.message).toBe("Invalid credentials");
