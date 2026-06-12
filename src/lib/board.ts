@@ -55,9 +55,7 @@ class Board {
     const diagonals = this.diagonals();
     const lines = rows.concat(columns, diagonals);
 
-    const result = lines.filter((line) =>
-      line.every((position) => position !== "" && position === line[0]),
-    );
+    const result = lines.filter((line) => line.every((position) => position !== "" && position === line[0]));
 
     return result.length !== 0;
   }
@@ -102,9 +100,7 @@ class Board {
     const diagonals = this.diagonals();
     const lines = rows.concat(columns, diagonals);
 
-    const result = lines.filter((line) =>
-      line.every((position) => position !== "" && position === line[0]),
-    );
+    const result = lines.filter((line) => line.every((position) => position !== "" && position === line[0]));
     if (result.length === 0) return "";
     return result[0][0];
   }

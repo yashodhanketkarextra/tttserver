@@ -132,4 +132,8 @@ describe("board controller tests", () => {
       expect(res.body.message).toBe("Illegal move - Not allowed");
     });
   });
+
+  it("sanity test", () => {
+    expect(true).toBe(true);
+  });
 });
