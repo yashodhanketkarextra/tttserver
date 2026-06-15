@@ -131,9 +131,28 @@ describe("board controller tests", () => {
       expect(res.status).toBe(400);
       expect(res.body.message).toBe("Illegal move - Not allowed");
     });
-  });
 
-  it("sanity test", () => {
-    expect(true).toBe(true);
+    it("self boards", async () => {
+      const res = await request(httpServer)
+        .get("/api/board/my")
+        .set({ Authorization: "Bearer " + tokenCreator });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data).toHaveLength(1);
+    });
+
+    it("self returns correct board", async () => {
+      const res = await request(httpServer)
+        .get("/api/board/" + board._id)
+        .set({ Authorization: "Bearer " + tokenCreator });
+
+      console.log(board._id);
+      expect(res.status).toBe(200);
+      expect(res.body.message).toBe("Board information");
+      expect(res.body.data.board.startedBy).toBe(String(userCreator._id));
+      expect(res.body.data.board.against).toBe(String(userPlayer._id));
+      expect(res.body.data.board.numberOfPlayers).toBe(2);
+      expect(res.body.data.board.grid).toHaveLength(9);
+    });
   });
 });

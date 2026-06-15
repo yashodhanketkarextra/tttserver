@@ -127,18 +127,6 @@ export class BoardService {
     return { status, joined: true };
   }
 
-  async myBoards(userId: string) {
-    const id = new Types.ObjectId(userId);
-    const boards = (
-      await BoardModel.find({
-        $or: [{ against: id }, { startedBy: id }],
-      })
-    )
-      .filter((ele) => ele.isDraw === false && ele.hasWinner === false)
-      .map((ele) => ele._id);
-    return boards;
-  }
-
   async getById(id: string) {
     const dbBoard = await BoardModel.findOne({ _id: id });
     if (!dbBoard) throw new AppError("Board not found", 404);

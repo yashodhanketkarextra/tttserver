@@ -9,32 +9,19 @@ export class BoardController {
   start = catchAsync(async (req: Request, res: Response) => {
     const board = await this.svc.createBoard(req.userId!);
 
-    await WebScoketHelper.sender(
-      JSON.stringify({ message: "New board created" }),
-    );
+    await WebScoketHelper.sender(JSON.stringify({ message: "New board created" }));
 
     return res.respond("Board created", 201, board);
   });
 
   join = catchAsync(async (req: Request, res: Response) => {
-    const { status, joined } = await this.svc.joinBoard(
-      req.params.id as string,
-      req.userId!,
-      req.body.key,
-    );
+    const { status, joined } = await this.svc.joinBoard(req.params.id as string, req.userId!, req.body.key);
 
     if (joined) {
-      await WebScoketHelper.sender(
-        JSON.stringify({ message: "Player two joined" }),
-      );
+      await WebScoketHelper.sender(JSON.stringify({ message: "Player two joined" }));
     }
 
     return res.respond("Joined board", 200, { status });
-  });
-
-  myBoards = catchAsync(async (req: Request, res: Response) => {
-    const boards = await this.svc.myBoards(req.userId!);
-    return res.respond("Users boards", 200, boards);
   });
 
   getByID = catchAsync(async (req: Request, res: Response) => {
@@ -44,16 +31,10 @@ export class BoardController {
 
   move = catchAsync(async (req: Request, res: Response) => {
     const moveIndex = req.body.index;
-    const { board, complete } = await this.svc.move(
-      req.params.id as string,
-      req.userId!,
-      moveIndex,
-    );
+    const { board, complete } = await this.svc.move(req.params.id as string, req.userId!, moveIndex);
 
     if (complete) {
-      await WebScoketHelper.sender(
-        JSON.stringify({ status: board, message: "Game over" }),
-      );
+      await WebScoketHelper.sender(JSON.stringify({ status: board, message: "Game over" }));
       return;
     }
 

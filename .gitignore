@@ -3,9 +3,7 @@ node_modules
 .vscode
 dist/
 
-.env.local
-.env.prod
-.env.test
+.env.*
 
 tests/k6
 tests/kulala
