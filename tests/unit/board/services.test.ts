@@ -38,6 +38,11 @@ describe("board services tests", () => {
     expect(board.against).not.toBeDefined();
   });
 
+  it("should not return non-existing board", async () => {
+    const fakeId = new mongoose.Types.ObjectId().toString();
+    expect(async () => await svc.getById(fakeId)).rejects.toThrow("Board not found");
+  });
+
   it("should join board", async () => {
     const board = await svc.createBoard(String(creator._id));
     const res = await svc.joinBoard(String(board._id), String(against._id), board.key);
@@ -48,7 +53,7 @@ describe("board services tests", () => {
     expect(res.status?.currentMark).toBe("X");
   });
 
-  it("should not join board - Incorrect board id", async () => {
+  it("should not join non-existing board", async () => {
     const fakeId = new mongoose.Types.ObjectId().toString();
     expect(async () => await svc.joinBoard(fakeId, String(against._id), "abcde")).rejects.toThrow(
       "Incorrect board number",
@@ -89,6 +94,24 @@ describe("board services tests", () => {
 
     expect(board.hasWinner).toBe(false);
     expect(board.isDraw).toBe(true);
+    expect(board.isGameOver).toBe(true);
+  });
+
+  it("should not make moves on non-existing board", async () => {
+    const fakeId = new mongoose.Types.ObjectId().toString();
+    expect(async () => await svc.move(fakeId, String(against._id), 3)).rejects.toThrow("Board not found");
+  });
+
+  it("should result in correct win assignment", async () => {
+    let board = await svc.createBoard(String(creator._id));
+    board.grid = ["X", "X", "", "O", "O", "", "", "X", ""];
+    await board.save();
+
+    await svc.move(String(board._id), String(creator._id), 6);
+    board = await svc.getById(String(board._id));
+
+    expect(board.hasWinner).toBe(true);
+    expect(board.winner).toEqual(creator._id);
     expect(board.isGameOver).toBe(true);
   });
 });
