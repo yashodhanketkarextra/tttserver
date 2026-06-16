@@ -5,10 +5,11 @@
   "type": "commonjs",
   "license": "GNU GPLv3",
   "scripts": {
-    "dev": "ts-node-dev --watch src --respawn --transpile-only src/server.ts",
+    "dev": "NODE_ENV=dev ts-node-dev --watch src --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "jest --verbose --detectOpenHandles"
+    "test": "jest --verbose --detectOpenHandles",
+    "test:coverage": "jest --verbose --detectOpenHandles --coverage"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -31,11 +32,13 @@
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.6.2",
     "@types/supertest": "^7.2.0",
+    "@types/ws": "^8.18.1",
     "jest": "^30.4.2",
     "mongodb-memory-server": "^11.1.0",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.9",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "ws": "^8.21.0"
   }
 }

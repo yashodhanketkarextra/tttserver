@@ -30,7 +30,7 @@ export class UserController {
   });
 
   statsByID = catchAsync(async (req: Request, res: Response) => {
-    const stats = await this.svc.gameStats(req.userId!);
+    const stats = await this.svc.gameStats(req.params.id as string);
     return res.respond("User's personal stats", 200, { ...stats });
   });
 

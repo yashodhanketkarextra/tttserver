@@ -70,25 +70,17 @@ export class BoardService {
     return { board: this.boardStatus(board), complete: true };
   }
 
-  async move(
-    boardId: string,
-    userId: string,
-    index: number,
-  ): Promise<{ board: BoardStatus; complete: Boolean }> {
+  async move(boardId: string, userId: string, index: number): Promise<{ board: BoardStatus; complete: Boolean }> {
     const id = new Types.ObjectId(userId);
     const dbBoard = await BoardModel.findById(boardId);
     if (!dbBoard) throw new Error("Board not found");
     let board = new Board(dbBoard.grid);
 
-    if (board.isPositionTaken(index))
-      throw new AppError("Illegal move - Not allowed", 400);
+    if (board.isPositionTaken(index)) throw new AppError("Illegal move - Not allowed", 400);
 
     const mark = board.currentMark();
 
-    if (
-      (mark === "X" && !dbBoard.against.equals(id)) ||
-      (mark === "O" && !dbBoard.startedBy.equals(id))
-    )
+    if ((mark === "X" && !dbBoard.against.equals(id)) || (mark === "O" && !dbBoard.startedBy.equals(id)))
       throw new AppError("Illegal move - Out of turn", 400);
 
     board = board.makeMove(index, mark);
@@ -96,21 +88,9 @@ export class BoardService {
       $set: { ...this.boardStatus(board) },
     });
 
-    if (board.hasWinner())
-      return await this.handleWinStatus(
-        dbBoard._id,
-        board,
-        dbBoard.startedBy,
-        dbBoard.against,
-      );
+    if (board.hasWinner()) return await this.handleWinStatus(dbBoard._id, board, dbBoard.startedBy, dbBoard.against);
 
-    if (board.isGameDraw())
-      return await this.handleDrawStatus(
-        dbBoard._id,
-        board,
-        dbBoard.startedBy,
-        dbBoard.against,
-      );
+    if (board.isGameDraw()) return await this.handleDrawStatus(dbBoard._id, board, dbBoard.startedBy, dbBoard.against);
 
     return { board: this.boardStatus(board), complete: false };
   }
@@ -130,18 +110,13 @@ export class BoardService {
     return newBoard;
   }
 
-  async joinBoard(
-    id: string,
-    userId: string,
-    key: string,
-  ): Promise<{ status: BoardStatus | null; joined: Boolean }> {
+  async joinBoard(id: string, userId: string, key: string): Promise<{ status: BoardStatus | null; joined: Boolean }> {
     const dbBoard = await BoardModel.findById(id);
     const player = new Types.ObjectId(userId);
     if (!dbBoard) throw new AppError("Incorrect board number", 404);
     if (key !== dbBoard.key) throw new AppError("Incorrect board key", 400);
 
     if (!dbBoard.startedBy.equals(player) && !dbBoard.against) {
-      console.log("Debug");
       await BoardModel.updateOne(dbBoard, {
         against: player,
         numberOfPlayers: Number(dbBoard.numberOfPlayers) + 1,
@@ -150,18 +125,6 @@ export class BoardService {
 
     const status = this.boardStatus(new Board(dbBoard.grid));
     return { status, joined: true };
-  }
-
-  async myBoards(userId: string) {
-    const id = new Types.ObjectId(userId);
-    const boards = (
-      await BoardModel.find({
-        $or: [{ against: id }, { startedBy: id }],
-      })
-    )
-      .filter((ele) => ele.isDraw === false && ele.hasWinner === false)
-      .map((ele) => ele._id);
-    return boards;
   }
 
   async getById(id: string) {
