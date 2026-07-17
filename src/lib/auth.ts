@@ -1,6 +1,6 @@
 import { compare } from "bcrypt";
 import { sign } from "jsonwebtoken";
-import { TOKEN } from "../store";
+import { config } from "../store";
 
 type User = {
   _id: string;
@@ -14,7 +14,7 @@ export class AuthHelper {
 
   async getToken(user: User) {
     if (!user._id) throw new Error("User not found");
-    return sign({ _id: user._id, username: user.username }, TOKEN, {
+    return sign({ _id: user._id, username: user.username }, config.TOKEN, {
       expiresIn: "1d",
     });
   }

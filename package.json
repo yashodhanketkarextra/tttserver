@@ -12,6 +12,7 @@
     "test:coverage": "jest --verbose --detectOpenHandles --coverage"
   },
   "dependencies": {
+    "@louriest/envisor": "^1.0.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

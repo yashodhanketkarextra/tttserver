@@ -8,7 +8,7 @@ import BoardRouter from "./routes/board";
 import UserRouter from "./routes/user";
 import { errMiddlware } from "./middlewares/globalErrors";
 
-import { DB_URI } from "./store";
+import { config } from "./store";
 import { responseMiddleware } from "./middlewares/responder";
 
 const app = express();
@@ -27,7 +27,7 @@ if (process.env.NODE_ENV !== "test") {
 
 export const mongoConnection = async () => {
   try {
-    await mongoose.connect(DB_URI);
+    await mongoose.connect(config.DB_URI);
     console.log("Database connected");
   } catch (err) {
     console.error("Dataase connection error: ", err);
