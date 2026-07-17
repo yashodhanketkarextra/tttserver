@@ -10,33 +10,33 @@
  *
  */
 
-class Board {
+class TTTBoard {
   grid: string[];
-  constructor(grid: string[] = new Array(9).fill("")) {
+  constructor(grid: string[] = new Array(9).fill('')) {
     this.grid = grid;
   }
 
-  makeMove(position: number, symbol: string): Board {
+  makeMove(position: number, symbol: string): TTTBoard {
     const newGrid = [...this.grid];
     newGrid[position - 1] = symbol;
-    return new Board(newGrid);
+    return new TTTBoard(newGrid);
   }
 
   currentMark(): string {
     if (this.availablePositionCount() % 2 !== 0) {
-      return "X";
+      return 'X';
     }
-    return "O";
+    return 'O';
   }
 
   isPositionTaken(position: number): boolean {
-    return this.grid[position - 1] !== "";
+    return this.grid[position - 1] !== '';
   }
 
   availablePositionCount(): number {
     let counter = 0;
     for (let index = 0; index < this.grid.length; index++) {
-      this.grid[index] === "" && counter++;
+      this.grid[index] === '' && counter++;
     }
     return counter;
   }
@@ -55,7 +55,9 @@ class Board {
     const diagonals = this.diagonals();
     const lines = rows.concat(columns, diagonals);
 
-    const result = lines.filter((line) => line.every((position) => position !== "" && position === line[0]));
+    const result = lines.filter((line) =>
+      line.every((position) => position !== '' && position === line[0]),
+    );
 
     return result.length !== 0;
   }
@@ -100,10 +102,12 @@ class Board {
     const diagonals = this.diagonals();
     const lines = rows.concat(columns, diagonals);
 
-    const result = lines.filter((line) => line.every((position) => position !== "" && position === line[0]));
-    if (result.length === 0) return "";
+    const result = lines.filter((line) =>
+      line.every((position) => position !== '' && position === line[0]),
+    );
+    if (result.length === 0) return '';
     return result[0][0];
   }
 }
 
-export default Board;
+export default TTTBoard;
