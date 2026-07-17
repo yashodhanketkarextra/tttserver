@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import { config } from "dotenv";
+import { configureEnv } from "@louriest/envisor";
 
-config({ path: ".env.test" });
+export const config = configureEnv({ DB_URI: "string", TOKEN: "string" }, { path: ".env.test" });
 
 beforeAll(async () => {
-  await mongoose.connect(process.env.DB_URI!);
+  await mongoose.connect(config.DB_URI);
   jest.spyOn(console, "error").mockImplementation(() => {});
 });
 
