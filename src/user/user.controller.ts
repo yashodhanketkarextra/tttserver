@@ -1,55 +1,47 @@
-import {
-  Request,
-  Controller,
-  Get,
-  Post,
-  Body,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
-import { UserService } from './user.service';
+import { Request, Req, Controller, Get, Post, Body, HttpCode, HttpStatus } from "@nestjs/common";
+import { UserService } from "./user.service";
 
-@Controller('api/users')
+@Controller("api/user")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('register')
+  @Post("register")
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() createUserDto: any) {
     const user = await this.userService.register(createUserDto);
     return {
-      _message: 'User registered successfully',
+      _message: "User registered successfully",
       id: user._id,
       username: user.username,
     };
   }
 
-  @Post('login')
+  @Post("login")
   @HttpCode(HttpStatus.OK)
   async login(@Body() data: any) {
     const { user, token } = await this.userService.login(data);
 
     return {
-      _message: 'User logged in successfully',
+      _message: "User logged in successfully",
       user: `Welcome ${user.username}`,
       token,
     };
   }
 
-  @Get('me')
+  @Get("me")
   @HttpCode(HttpStatus.OK)
-  async me(@Request() req: Request) {
+  async me(@Req() req: Request) {
     const user = await this.userService.getById((req as any).userId);
     return {
-      _message: 'User information',
+      _message: "User information",
       id: user._id,
       username: user.username,
     };
   }
 
-  @Get('stats')
+  @Get("stats/:id")
   @HttpCode(HttpStatus.OK)
-  async stats(@Request() req: Request) {
+  async stats(@Req() req: Request) {
     const stats = await this.userService.gameStats((req as any).userId);
     return {
       _message: "User's personal stats",
@@ -57,12 +49,12 @@ export class UserController {
     };
   }
 
-  @Get('stats/:id')
+  @Get("stats")
   @HttpCode(HttpStatus.OK)
   async statsById() {
     const users = await this.userService.listStats();
     return {
-      _message: 'All users stats',
+      _message: "All users stats",
       ...users,
     };
   }

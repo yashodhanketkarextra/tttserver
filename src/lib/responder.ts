@@ -5,12 +5,7 @@ export class Responder {
   statusCode: number;
   data: any;
 
-  static send(
-    res: Response,
-    message: string,
-    statusCode: number = 200,
-    data: any = null,
-  ) {
+  static send(res: Response, message: string, statusCode: number = 200, data: any = null) {
     return res.status(statusCode).json({
       message,
       data,

@@ -1,6 +1,6 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as mongooseSchema } from 'mongoose';
-import { hash, genSalt } from 'bcrypt';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document, Schema as mongooseSchema } from "mongoose";
+import { hash, genSalt } from "bcrypt";
 
 export type UserDocument = User & Document;
 
@@ -25,7 +25,7 @@ export class User {
   draw: number;
 
   @Prop({
-    type: [{ type: mongooseSchema.Types.ObjectId, ref: 'Board' }],
+    type: [{ type: mongooseSchema.Types.ObjectId, ref: "Board" }],
     default: [],
   })
   boards: mongooseSchema.Types.ObjectId[];
@@ -33,7 +33,7 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-UserSchema.pre('save', async function () {
-  if (!this.isModified('password')) return;
+UserSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   this.password = await hash(this.password, await genSalt(10));
 });

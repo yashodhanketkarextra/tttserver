@@ -1,13 +1,8 @@
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { User, UserDocument } from './user.schema';
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { AuthHelper } from '../lib/auth';
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { User, UserDocument } from "./user.schema";
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { AuthHelper } from "../lib/auth";
 
 @Injectable()
 export class UserService {
@@ -22,7 +17,7 @@ export class UserService {
         username: data.username,
       })
       .exec();
-    if (exists > 0) throw new ConflictException('Username already exists');
+    if (exists > 0) throw new ConflictException("Username already exists");
     return await this.userModel.create({ ...data });
   }
 
@@ -33,10 +28,10 @@ export class UserService {
       })
       .exec();
 
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (!user) throw new UnauthorizedException("Invalid credentials");
 
     const validate = await this.auth.verifyPass(data.password, user.password);
-    if (!validate) throw new UnauthorizedException('Invalid credentials');
+    if (!validate) throw new UnauthorizedException("Invalid credentials");
 
     const token = await this.auth.getToken({
       _id: String(user._id),
@@ -48,7 +43,7 @@ export class UserService {
 
   async getById(userId: string) {
     const user = await this.userModel.findById(userId).exec();
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException("User not found");
     return user;
   }
 
@@ -62,45 +57,30 @@ export class UserService {
         },
         {
           $lookup: {
-            from: 'boards',
-            let: { userId: '$_id' },
+            from: "boards",
+            let: { userId: "$_id" },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $or: [
-                      { $eq: ['$startedBy', '$$userId'] },
-                      { $eq: ['$against', '$$userId'] },
-                    ],
+                    $or: [{ $eq: ["$startedBy", "$$userId"] }, { $eq: ["$against", "$$userId"] }],
                   },
                 },
               },
             ],
-            as: 'boards',
+            as: "boards",
           },
         },
         {
           $addFields: {
             winRate: {
-              $cond: [
-                { $gt: ['$played', 0] },
-                { $round: [{ $divide: ['$win', '$played'] }, 2] },
-                0,
-              ],
+              $cond: [{ $gt: ["$played", 0] }, { $round: [{ $divide: ["$win", "$played"] }, 2] }, 0],
             },
             lossRate: {
-              $cond: [
-                { $gt: ['$played', 0] },
-                { $round: [{ $divide: ['$loss', '$played'] }, 2] },
-                0,
-              ],
+              $cond: [{ $gt: ["$played", 0] }, { $round: [{ $divide: ["$loss", "$played"] }, 2] }, 0],
             },
             drawRate: {
-              $cond: [
-                { $gt: ['$played', 0] },
-                { $round: [{ $divide: ['$draw', '$played'] }, 2] },
-                0,
-              ],
+              $cond: [{ $gt: ["$played", 0] }, { $round: [{ $divide: ["$draw", "$played"] }, 2] }, 0],
             },
           },
         },
@@ -109,7 +89,7 @@ export class UserService {
             _id: 0,
             username: 1,
             boards: 1,
-            games: '$played',
+            games: "$played",
             win: 1,
             winRate: 1,
             loss: 1,
@@ -128,25 +108,13 @@ export class UserService {
       {
         $addFields: {
           winRate: {
-            $cond: [
-              { $gt: ['$played', 0] },
-              { $round: [{ $divide: ['$win', '$played'] }, 2] },
-              0,
-            ],
+            $cond: [{ $gt: ["$played", 0] }, { $round: [{ $divide: ["$win", "$played"] }, 2] }, 0],
           },
           lossRate: {
-            $cond: [
-              { $gt: ['$played', 0] },
-              { $round: [{ $divide: ['$loss', '$played'] }, 2] },
-              0,
-            ],
+            $cond: [{ $gt: ["$played", 0] }, { $round: [{ $divide: ["$loss", "$played"] }, 2] }, 0],
           },
           drawRate: {
-            $cond: [
-              { $gt: ['$played', 0] },
-              { $round: [{ $divide: ['$draw', '$played'] }, 2] },
-              0,
-            ],
+            $cond: [{ $gt: ["$played", 0] }, { $round: [{ $divide: ["$draw", "$played"] }, 2] }, 0],
           },
         },
       },
@@ -155,7 +123,7 @@ export class UserService {
           _id: 1,
           username: 1,
           boards: 1,
-          games: '$played',
+          games: "$played",
           win: 1,
           winRate: 1,
           loss: 1,
