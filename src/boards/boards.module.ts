@@ -9,14 +9,8 @@ import { UserSchema, User } from "src/user/user.schema";
 @Module({
   imports: [
     MongooseModule.forFeature([
-      {
-        name: Board.name,
-        schema: BoardSchema,
-      },
-      {
-        name: User.name,
-        schema: UserSchema,
-      },
+      { name: Board.name, schema: BoardSchema },
+      { name: User.name, schema: UserSchema },
     ]),
   ],
   controllers: [BoardController],

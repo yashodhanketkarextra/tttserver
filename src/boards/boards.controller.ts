@@ -1,15 +1,15 @@
-import { Request, Req, Controller, Get, HttpCode, HttpStatus, Put, Param, Body } from "@nestjs/common";
+import { Request, Req, Controller, Get, HttpCode, HttpStatus, Put, Param, Body, Post } from "@nestjs/common";
 import { BoardsService } from "./boards.service";
 import { BoardGateway } from "./board.gateway";
 
-@Controller("api/board")
+@Controller("board")
 export class BoardController {
   constructor(
     private readonly boardsService: BoardsService,
     private readonly boardGateway: BoardGateway,
   ) {}
 
-  @Get("/new")
+  @Post("/new")
   @HttpCode(HttpStatus.CREATED)
   async start(@Request() req: Request) {
     const board = await this.boardsService.createBoard((req as any).userId as string);

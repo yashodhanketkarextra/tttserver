@@ -2,7 +2,11 @@ import { compare } from "bcrypt";
 import { sign } from "jsonwebtoken";
 import { config } from "../store";
 import { Injectable } from "@nestjs/common";
-import { User } from "./types";
+
+type User = {
+  _id: string;
+  username: string;
+};
 
 @Injectable()
 export class AuthHelper {

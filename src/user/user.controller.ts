@@ -1,7 +1,7 @@
-import { Request, Req, Controller, Get, Post, Body, HttpCode, HttpStatus } from "@nestjs/common";
+import { Request, Req, Controller, Get, Post, Body, HttpCode, HttpStatus, Param } from "@nestjs/common";
 import { UserService } from "./user.service";
 
-@Controller("api/user")
+@Controller("user")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -24,6 +24,7 @@ export class UserController {
     return {
       _message: "User logged in successfully",
       user: `Welcome ${user.username}`,
+      id: user._id,
       token,
     };
   }
@@ -41,8 +42,8 @@ export class UserController {
 
   @Get("stats/:id")
   @HttpCode(HttpStatus.OK)
-  async stats(@Req() req: Request) {
-    const stats = await this.userService.gameStats((req as any).userId);
+  async stats(@Param("id") id: string) {
+    const stats = await this.userService.gameStats(id);
     return {
       _message: "User's personal stats",
       ...stats,
@@ -56,6 +57,15 @@ export class UserController {
     return {
       _message: "All users stats",
       ...users,
+    };
+  }
+
+  @Get("")
+  @HttpCode(HttpStatus.OK)
+  async sanity() {
+    return {
+      _message: "Sanity check",
+      status: "ok",
     };
   }
 }
