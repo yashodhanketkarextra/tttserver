@@ -69,6 +69,11 @@ describe("UserController (e2e)", () => {
   });
 
   it("should not create a duplicate user", async () => {
+    await request(httpServer).post("/api/user/register").send({
+      username: "user1",
+      password: "password",
+    });
+
     const res = await request(httpServer).post("/api/user/register").send({
       username: "user1",
       password: "password",
