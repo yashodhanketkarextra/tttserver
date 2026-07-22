@@ -10,16 +10,16 @@
  *
  */
 
-class Board {
+class TTTBoard {
   grid: string[];
   constructor(grid: string[] = new Array(9).fill("")) {
     this.grid = grid;
   }
 
-  makeMove(position: number, symbol: string): Board {
+  makeMove(position: number, symbol: string): TTTBoard {
     const newGrid = [...this.grid];
     newGrid[position - 1] = symbol;
-    return new Board(newGrid);
+    return new TTTBoard(newGrid);
   }
 
   currentMark(): string {
@@ -106,4 +106,4 @@ class Board {
   }
 }
 
-export default Board;
+export default TTTBoard;

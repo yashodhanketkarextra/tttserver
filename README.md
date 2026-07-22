@@ -6,11 +6,11 @@ This is source code for a tictactoe game, this serves as a backend for the ticta
 Tech Stack
 ----------
 
--	Express (Core)
--	ExpressWS (WebSockets)
--	JWT and bcyrpt (Auth)
+-	NestJs (Core)
 -	MongoDB (Database)
--	Mongoose (ORM)
+-	Socket.io (WebSockets)
+-	JWT and bcyrpt (Auth)
+-	nestjs/Mongoose (ORM)
 
 Installation
 ------------
@@ -27,9 +27,9 @@ Installation
 
 3.	Run `pnpm install` to install dependencies
 
-4.	Run `pnpm dev` to start the server
+4.	Run `pnpm start:dev` to start the server
 
 License
 -------
 
-This project is licensed under the terms of the [GNU General Public License v3.00](./LICENSE). Please refer to the [LICENSE](./LICENSE) file for more information.
+This project is licensed under the terms of the [GNU GPL 3.0](./LICENSE). Please refer to the [LICENSE](./LICENSE) file for more information.

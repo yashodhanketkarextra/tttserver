@@ -1,12 +1,14 @@
 import { compare } from "bcrypt";
 import { sign } from "jsonwebtoken";
 import { config } from "../store";
+import { Injectable } from "@nestjs/common";
 
 type User = {
   _id: string;
   username: string;
 };
 
+@Injectable()
 export class AuthHelper {
   async verifyPass(password: string, dbPassword: string) {
     return compare(password, dbPassword);
